@@ -100,7 +100,8 @@ def main(
     config.training.epoch_num = n_iters // len(data.train_loader) + int(
         n_iters % len(data.train_loader) != 0
     )
-
+    
+    print("begin training")
     train(
         config=config,
         gs_wrapper=gs_wrapper,

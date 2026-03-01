@@ -47,6 +47,7 @@ def train(
     print("=" * 90 + "\n")
 
     if (not USE_COMET):
+        print("LOGGING WITH WANDB")
         wandb.login(force=True)
         wandb.init(
             project=config.logging.project_name,
@@ -56,6 +57,7 @@ def train(
         )
         wandb.run.log_code("./", include_fn=lambda path: path.endswith(".py"))
     else:
+        print("LOGGING WITH COMET")
         experiment = Experiment(project_name=config.logging.project_name, log_code=True)
         experiment.set_name(f"{config.logging.run_name}_{date_str}")
         experiment.log_parameters(config)
