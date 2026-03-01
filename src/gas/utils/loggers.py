@@ -1,21 +1,39 @@
+from typing import Optional
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from torchvision.utils import make_grid
+import os
 
-import wandb
+USE_COMET = (os.getenv("GAS_LOGGER") == "COMET")
+
+COMET_API = None
+
+if (USE_COMET):
+    import comet_ml
+    from comet_ml import Experiment
+    COMET_API = os.getenv('COMET_API_KEY')
+    comet_ml.login(project_name="gas-fork")
+else:
+    import wandb
+
 from src.gas.gs_wrapper import GSWrapper
 
 
-def log_plt_fig(fig, key: str, global_step: int) -> None:
+def log_plt_fig(fig, key: str, global_step: int, experiment: Optional[Experiment]=None) -> None:
     fig.tight_layout()
-    wandb.log({key: wandb.Image(fig)}, step=global_step)
+    if (USE_COMET):
+        assert(experiment is not None)
+        experiment.log_figure(key, fig, step=global_step)
+    else:
+        wandb.log({key: wandb.Image(fig)}, step=global_step)
     plt.close("all")
 
 
 @torch.no_grad()
 def log_t_steps_plot(
-    t_steps: torch.Tensor, global_step: int = None, key: str = None
+    t_steps: torch.Tensor, global_step: int = None, key: str = None, experiment: Optional[Experiment]=None
 ) -> None:
 
     t_steps = t_steps.detach().cpu().numpy()
@@ -30,7 +48,7 @@ def log_t_steps_plot(
     if global_step is None:
         return
 
-    log_plt_fig(fig=fig, key=key, global_step=global_step)
+    log_plt_fig(fig=fig, key=key, global_step=global_step, experiment=experiment)
 
 
 @torch.no_grad()
@@ -49,7 +67,7 @@ def vis_grid(a: torch.Tensor, ax=None) -> None:
 
 @torch.no_grad()
 def log_end_img(
-    x_s: torch.Tensor, x_t: torch.Tensor, global_step: int = None, key: str = None
+    x_s: torch.Tensor, x_t: torch.Tensor, global_step: int = None, key: str = None, experiment: Optional[Experiment]=None
 ) -> None:
     fig, ax = plt.subplots(1, 2, figsize=(10, 5))
 
@@ -64,11 +82,11 @@ def log_end_img(
     if global_step is None:
         return
 
-    log_plt_fig(fig=fig, key=key, global_step=global_step)
+    log_plt_fig(fig=fig, key=key, global_step=global_step, experiment=experiment)
 
 
 @torch.no_grad()
-def log_weights(model: GSWrapper, global_step: int, suff: str = "") -> None:
+def log_weights(model: GSWrapper, global_step: int, suff: str = "", experiment: Optional[Experiment]=None) -> None:
     d = {}
     key = f"weights_stats{suff}"
 
@@ -81,11 +99,14 @@ def log_weights(model: GSWrapper, global_step: int, suff: str = "") -> None:
             for i, v in enumerate(data):
                 d[f"{key}_{t}/{i:02d}"] = v
 
-    wandb.log(d, step=global_step)
+    if (USE_COMET):
+        experiment.log_metrics(d, step=global_step)
+    else:
+        wandb.log(d, step=global_step)
 
 
 @torch.no_grad()
-def log_grads(model: GSWrapper, global_step: int) -> None:
+def log_grads(model: GSWrapper, global_step: int, experiment: Optional[Experiment]=None) -> None:
     d = {}
     key = "grads_stats"
     for t, p in model.named_parameters():
@@ -96,16 +117,22 @@ def log_grads(model: GSWrapper, global_step: int) -> None:
                 continue
             for i, v in enumerate(data):
                 d[f"{key}_{t}/{i:02d}"] = v
-
-    wandb.log(d, step=global_step)
+    
+    if (USE_COMET):
+        experiment.log_metrics(d, step=global_step)
+    else:
+        wandb.log(d, step=global_step)
 
 
 @torch.no_grad()
-def log_t_steps(t_steps: torch.Tensor, global_step: int, key: str = "t_stats") -> None:
+def log_t_steps(t_steps: torch.Tensor, global_step: int, key: str = "t_stats", experiment: Optional[Experiment]=None) -> None:
     t_steps = t_steps.detach().clone().cpu().numpy()
 
     d = {}
     for i, t in enumerate(t_steps):
         d[f"{key}/t_{i:02d}"] = t
-
-    wandb.log(d, step=global_step)
+    
+    if (USE_COMET):
+        experiment.log_metrics(d, step=global_step)
+    else:
+        wandb.log(d, step=global_step)
