@@ -11,6 +11,7 @@ USE_COMET = (os.getenv("GAS_LOGGER") == "COMET")
 COMET_API = None
 
 if (USE_COMET):
+    #print("USING COMET")
     import comet_ml
     from comet_ml import Experiment
     COMET_API = os.getenv('COMET_API_KEY')

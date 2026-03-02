@@ -52,7 +52,6 @@ def main(
     train_size: int,
     device=torch.device("cuda"),
 ):
-    print("MAIN")
     with open(config) as stream:
         config = ConfigDict(yaml.safe_load(stream))
 
