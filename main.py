@@ -31,6 +31,12 @@ from training import train
     help="Number of student steps.",
 )
 @click.option(
+    "--order",
+    metavar="INT",
+    type=click.IntRange(4, 10),
+    help="Order of solver.",
+)
+@click.option(
     "--teacher_pkl",
     metavar="PATH",
     type=str,
@@ -50,6 +56,7 @@ def main(
     student_step: int,
     teacher_pkl: str,
     train_size: int,
+    order: int,
     device=torch.device("cuda"),
 ):
     with open(config) as stream:
