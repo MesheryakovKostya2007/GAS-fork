@@ -76,7 +76,7 @@ def main(
     solver_config = config.student_solver_config
     solver_config.loss_config.loss_type = loss_type
     solver_config.steps = student_step
-    solver_config.order = student_step
+    solver_config.order = order
 
     solver_config.student_name = "_".join(
         f"{k}={v}" for k, v in solver_config.items() if k != "loss_config"

@@ -249,6 +249,7 @@ class GeneralizedSolver:
         Returns:
             torch.Tensor: Updated solution estimate at time t.
         """
+        assert False
         assert len(model_prev_list) == len(t_prev_list)
         assert len(x_prev_list) == len(t_prev_list)
         model_prev_1, model_prev_0 = model_prev_list[-2], model_prev_list[-1]
@@ -288,6 +289,7 @@ class GeneralizedSolver:
         Returns:
             torch.Tensor: Updated solution estimate at time t.
         """
+        assert False
         assert len(model_prev_list) == len(t_prev_list)
         assert len(x_prev_list) == len(t_prev_list)
         model_prev_2, model_prev_1, model_prev_0 = model_prev_list[-3], model_prev_list[-2], model_prev_list[-1]
