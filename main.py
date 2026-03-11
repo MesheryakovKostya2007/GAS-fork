@@ -33,7 +33,7 @@ from training import train
 @click.option(
     "--order",
     metavar="INT",
-    type=click.IntRange(4, 10),
+    type=click.IntRange(1, 10),
     help="Order of solver.",
 )
 @click.option(
